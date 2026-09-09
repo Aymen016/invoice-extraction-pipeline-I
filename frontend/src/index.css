@@ -1,0 +1,366 @@
+/* Ledger palette.
+   Grounded in the work: this is a reconciliation tool, so it borrows from
+   accounting ledger paper (the pale green that reduced eye strain under
+   gaslight) and from the coloured pencils a bookkeeper used to mark up a
+   page — green ticks for verified, red for queried. */
+
+:root {
+  --ledger:      #e4eae0;  /* ledger paper */
+  --ledger-deep: #d5dfd0;  /* rules and dividers */
+  --sheet:       #fdfdfb;  /* working surface */
+  --ink:         #1b241a;  /* text */
+  --ink-soft:    #5c6b58;  /* secondary text */
+  --rule:        #c6d2c0;
+
+  --tick:        #2f6b4f;  /* verified — green pencil */
+  --query:       #a8762a;  /* uncertain — amber */
+  --flag:        #a83f38;  /* queried — red pencil */
+
+  --edit:        #f6f3e4;  /* a field the reviewer has touched */
+
+  --gap: 1rem;
+  --radius: 3px;
+
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  /* Figures must align down the column. This is a ledger. */
+  font-variant-numeric: tabular-nums;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ledger);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--tick);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- layout */
+
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--sheet);
+  border-bottom: 1px solid var(--rule);
+}
+
+.masthead h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+.masthead .figures {
+  display: flex;
+  gap: 1.5rem;
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.masthead .figures b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr) minmax(0, 24rem);
+  gap: 1px;
+  background: var(--rule);
+  min-height: 0;
+}
+
+.workspace > * {
+  background: var(--sheet);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (max-width: 1100px) {
+  .workspace { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+  .preview { min-height: 20rem; }
+}
+
+/* ----------------------------------------------------------------- queue */
+
+.queue h2,
+.panel h2 {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  background: var(--sheet);
+}
+
+.queue-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 1rem 0.7rem 0.75rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--ledger-deep);
+  border-left: 3px solid transparent;
+}
+
+.queue-item:hover { background: var(--ledger); }
+
+.queue-item[aria-current="true"] {
+  background: var(--ledger);
+  border-left-color: var(--ink);
+}
+
+.queue-item .vendor {
+  display: block;
+  font-weight: 550;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-item .meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.queue-item .flags { color: var(--flag); font-weight: 600; }
+
+/* --------------------------------------------------------------- preview */
+
+.preview {
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+  background: var(--ledger);
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--ledger);
+}
+
+/* ---------------------------------------------------------------- fields */
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  align-items: start;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--ledger-deep);
+}
+
+/* The signature element: a pencil-tick gutter, the way a bookkeeper marks
+   a page. Position in the margin carries the meaning, so the glyph does not
+   have to shout. */
+.tick {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: center;
+  user-select: none;
+}
+
+.tick.high { color: var(--tick); }
+.tick.mid  { color: var(--query); }
+.tick.low  { color: var(--flag); }
+
+.field-row label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.15rem;
+}
+
+.field-row input {
+  width: 100%;
+  padding: 0.32rem 0.45rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom-color: var(--rule);
+  border-radius: var(--radius);
+}
+
+.field-row input:hover { border-color: var(--rule); }
+.field-row input:focus { background: #fff; border-color: var(--tick); }
+.field-row.edited input { background: var(--edit); }
+
+.field-row.edited label::after {
+  content: " · unsaved";
+  color: var(--query);
+}
+
+.field-row .score {
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+}
+
+/* --------------------------------------------------------------- issues */
+
+.issues {
+  margin: 0;
+  padding: 0.6rem 1rem 0.6rem 2.2rem;
+  background: #faf1ef;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.83rem;
+  line-height: 1.45;
+  color: #7d2f29;
+}
+
+.issues li { margin-bottom: 0.3rem; }
+.issues li:last-child { margin-bottom: 0; }
+
+/* --------------------------------------------------------------- actions */
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--rule);
+  position: sticky;
+  bottom: 0;
+  background: var(--sheet);
+}
+
+.btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--rule);
+  background: var(--sheet);
+  color: var(--ink);
+  font-weight: 550;
+  font-size: 0.88rem;
+}
+
+.btn:hover:not(:disabled) { background: var(--ledger); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn.primary {
+  background: var(--tick);
+  border-color: var(--tick);
+  color: #fff;
+}
+.btn.primary:hover:not(:disabled) { background: #275a42; }
+
+.btn.danger { color: var(--flag); border-color: #d9bcb9; }
+.btn.danger:hover:not(:disabled) { background: #faf1ef; }
+
+/* ---------------------------------------------------------------- misc */
+
+.line-items {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.line-items th {
+  text-align: left;
+  font-weight: 550;
+  color: var(--ink-soft);
+  padding: 0.35rem 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.line-items td {
+  padding: 0.35rem 1rem;
+  border-bottom: 1px solid var(--ledger-deep);
+}
+
+.line-items td:not(:first-child),
+.line-items th:not(:first-child) { text-align: right; }
+
+.history {
+  padding: 0.5rem 1rem 1rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.history div { padding: 0.25rem 0; border-bottom: 1px solid var(--ledger-deep); }
+.history b { color: var(--ink); font-weight: 550; }
+
+.empty {
+  padding: 2.5rem 1.25rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.empty strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.shortcuts {
+  padding: 0.55rem 1rem;
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--rule);
+}
+
+.shortcuts kbd {
+  background: var(--ledger);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 0 0.28rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+}
+
+.banner {
+  padding: 0.55rem 1.25rem;
+  font-size: 0.85rem;
+  background: #faf1ef;
+  color: #7d2f29;
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
